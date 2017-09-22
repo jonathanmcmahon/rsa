@@ -9,6 +9,7 @@ class TestUtilFunctions(unittest.TestCase):
 
     def setUp(self):
         self.r = rsa.RSA(8, verbose=True)
+        self.pg = rp.RandomPrimeGenerator()
 
     def test_relatively_prime(self):
         self.assertEqual(util.relatively_prime(12, 13), True)
@@ -45,6 +46,14 @@ class TestUtilFunctions(unittest.TestCase):
         print("d inverted: %d" % d_inverted)
         assert d_inverted % ((r.p - 1) * (r.q - 1)) == 1
 
+    def test_is_prime(self):
+        with open('primes.txt') as f:
+            list_primes = [map(int, line.split()) for line in f][0]
+        for i in range(2,7920):
+            if i in list_primes:
+                assert self.pg.is_prime(i) == True, "%d was misclassified as NOT prime" % i
+            else:
+                assert self.pg.is_prime(i) == False, "%d was misclassified as prime" % i
 
 
 if __name__ == '__main__':
