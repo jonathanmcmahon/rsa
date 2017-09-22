@@ -7,11 +7,14 @@ class RSA:
 
     prime_gen = rp.RandomPrimeGenerator()
 
-    def __init__(self, bits):
-        self.p = self.prime_gen(bits) # TOP SECRET!!!
-        self.q = self.prime_gen(bits) # TOP SECRET!!!
+    def __init__(self, bits, verbose=False):
+        self.verbose = verbose
+        self.p = self.prime_gen.generate(bits) # TOP SECRET!!!
+        self.q = self.prime_gen.generate(bits) # TOP SECRET!!!
         self.e = self._generate_public_key()
         self.d = self._generate_private_key()
+        if self.verbose:
+            print("p: %d, q: %d, e: %d, d: %d" % (self.p, self.q, self.e, self.d))
 
     def _get_n(self):
         return self.p * self.q
@@ -24,7 +27,7 @@ class RSA:
         for i in range(3, (p * q) / 2):
             if util.relatively_prime(i, (p - 1) * ( q - 1)):
                 return i
-        raise "Could not find a public key relatively prime to (p-1)(q-1)!"
+        raise Exception("Could not find a public key relatively prime to (p-1)(q-1)!")
 
     def _generate_private_key(self):
         p, q, e = self.p, self.q, self.e
