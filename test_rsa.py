@@ -7,7 +7,8 @@ import randomprime as rp
 
 class TestUtilFunctions(unittest.TestCase):
 
-    VERBOSE = True
+    def setUp(self):
+        self.r = rsa.RSA(8, verbose=True)
 
     def test_relatively_prime(self):
         self.assertEqual(util.relatively_prime(12, 13), True)
@@ -31,11 +32,19 @@ class TestUtilFunctions(unittest.TestCase):
         assert util.mod_mult_inverse(21, 91) is None
 
     def test_generate_public_key(self):
-        r = rsa.RSA(8, verbose=self.VERBOSE)
+        r = self.r
         r.p = 2
         r.q = 4
         with self.assertRaises(Exception):
             r._generate_public_key()
+
+    def test_generate_private_key(self):
+        r = self.r
+        # d should be the inverse of e mod (p-1)(q-1)
+        d_inverted = r.d * (r.e % ((r.p - 1) * (r.q - 1)))
+        print("d inverted: %d" % d_inverted)
+        assert d_inverted % ((r.p - 1) * (r.q - 1)) == 1
+
 
 
 if __name__ == '__main__':
