@@ -1,14 +1,17 @@
 """Unit tests for RSA cryptosystem and related modules."""
 import unittest
+import agent
 import helpers as util
-import rsa
+import rsa as crypto
 import randomprime as rp
 
 
 class TestUtilFunctions(unittest.TestCase):
 
     def setUp(self):
-        self.r = rsa.RSA(8, verbose=True)
+        self.alice = agent.Agent()
+        self.bob = agent.Agent()
+        self.r = crypto.RSA(8, verbose=True)
         self.pg = rp.RandomPrimeGenerator()
 
     def test_relatively_prime(self):
@@ -54,6 +57,21 @@ class TestUtilFunctions(unittest.TestCase):
                 assert self.pg.is_prime(i) == True, "%d was misclassified as NOT prime" % i
             else:
                 assert self.pg.is_prime(i) == False, "%d was misclassified as prime" % i
+
+    def test_message_transmission_controlledkeys(self):
+        rigged = crypto.RSA(8, p=11, q=3, e=3)
+        jane = agent.Agent(c=rigged)
+        assert jane.get_public_key() == (33, 3), jane.get_public_key()
+        assert jane.c.d == 7
+        y = self.alice.encrypt_message(7, jane.get_public_key())
+        p = jane.decrypt_message(y)
+        assert p == 7
+
+    def test_message_transmission_randomkeys(self):
+        y = self.alice.encrypt_message(7, self.bob.get_public_key())
+        p = self.bob.decrypt_message(y)
+        print("Decrypted: %d" % p)
+        assert p == 7
 
 
 if __name__ == '__main__':
